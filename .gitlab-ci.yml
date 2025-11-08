@@ -1,0 +1,103 @@
+# 1. DEFINIÇÃO DOS ESTÁGIOS
+# Os estágios rodam nesta ordem. Jobs do mesmo estágio rodam em paralelo.
+stages:
+  - build
+  - test
+  - lint
+
+# 2. TEMPLATES (Para evitar repetição - Boa Prática)
+# Usamos '.nome' para criar um "template" que não roda sozinho.
+
+.backend_job_template:
+  image: python:3.11-alpine # Imagem Docker que o job vai usar
+  before_script:
+    - cd backend
+    # Instala as dependências (com cache para acelerar)
+    - pip install --cache-dir ../.pip-cache -r requirements.txt
+  cache:
+    key: ${CI_COMMIT_REF_SLUG}-pip
+    paths:
+      - .pip-cache/
+
+.frontend_job_template:
+  image: node:20-alpine # Imagem Docker que o job vai usar
+  before_script:
+    - cd frontend
+    # 'npm ci' é mais rápido e seguro para CI do que 'npm install'
+    - npm ci
+  cache:
+    key: ${CI_COMMIT_REF_SLUG}-node
+    paths:
+      - frontend/node_modules/
+
+# 3. ESTÁGIO DE BUILD (Missão 3.1)
+# Garante que a aplicação "compila".
+
+build_backend:
+  stage: build
+  extends: .backend_job_template
+  script:
+    # Para Python, "build" significa checar se o projeto está válido.
+    # O 'manage.py check' faz isso sem precisar do DB.
+    - python manage.py check
+
+build_frontend:
+  stage: build
+  extends: .frontend_job_template
+  script:
+    # 'npm run build' compila o Next.js
+    - npm run build
+
+# 4. ESTÁGIO DE TESTE (Missão 3.2)
+# Roda os testes unitários que criamos.
+
+test_backend:
+  stage: test
+  extends: .backend_job_template
+  script:
+    - python manage.py test
+
+  # !! IMPORTANTE !!
+  # 'settings.py' precisa de um banco de dados.
+  # O Gitlab CI pode "anexar" um serviço (um container) só para este job.
+  services:
+    - postgres:15-alpine
+
+  variables:
+    # Configura o serviço 'postgres'
+    POSTGRES_DB: test_db
+    POSTGRES_USER: test_user
+    POSTGRES_PASSWORD: test_password
+    # Truque para pular autenticação complexa no CI
+    POSTGRES_HOST_AUTH_METHOD: trust
+
+    # Passa as variáveis para o settings.py do Django
+    DB_NAME: $POSTGRES_DB
+    DB_USER: $POSTGRES_USER
+    DB_PASSWORD: $POSTGRES_PASSWORD
+    DB_HOST: postgres # O Gitlab CI linka o serviço com o nome 'postgres'
+    DB_PORT: 5432
+
+test_frontend:
+  stage: test
+  extends: .frontend_job_template
+  script:
+    # Roda o script de teste que adicionamos ao package.json
+    - npm run test
+
+# 5. ESTÁGIO DE LINT (Missão 3.3)
+# Checa o estilo do código.
+
+lint_backend:
+  stage: lint
+  extends: .backend_job_template
+  script:
+    # Roda o flake8 que instalamos
+    - flake8 .
+
+lint_frontend:
+  stage: lint
+  extends: .frontend_job_template
+  script:
+    # Roda o script de lint que já veio com o Next.js
+    - npm run lint

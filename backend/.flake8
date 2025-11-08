@@ -1,0 +1,6 @@
+[flake8]
+# Pastas para ignorar
+exclude = .git,__pycache__,migrations,venv,.venv
+
+# Tamanho máximo da linha (padrão 79 é muito curto)
+max-line-length = 119
