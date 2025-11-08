@@ -1,0 +1,38 @@
+# frontend/Dockerfile.prod
+
+# --- Estágio 1: "Builder" ---
+FROM node:25-alpine AS builder
+# Muda para ROOT para poder criar/escrever em /app
+USER root 
+WORKDIR /app
+COPY package*.json .
+RUN npm ci
+COPY . .
+RUN npm run build
+
+# --- Estágio 2: "Runner" (A Imagem Final) ---
+FROM node:25-alpine
+
+# Muda para ROOT para poder criar/escrever em /app
+USER root 
+WORKDIR /app
+
+# 1. Copia 'package.json' e instala (como root)
+COPY package*.json .
+RUN npm install --omit=dev
+
+# 2. Copia os arquivos de produção (como root)
+COPY --from=builder /app/public ./public
+COPY --from=builder /app/.next ./.next
+
+# 3. (SEGURANÇA) Dê a posse de todos os arquivos para o usuário 'node'
+RUN chown -R node:node /app
+
+# 4. (SEGURANÇA) Agora, mude permanentemente para o usuário 'node'
+USER node
+
+# 5. Expõe a porta
+EXPOSE 3000
+
+# 6. Comando de Produção (agora roda como 'node')
+CMD ["npm", "start"]

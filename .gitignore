@@ -19,3 +19,7 @@ dist/
 # IDE
 .vscode/
 .idea/
+
+# Arquivos de Produção
+.env.prod
+nginx/ssl/

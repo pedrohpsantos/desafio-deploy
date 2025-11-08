@@ -1,0 +1,61 @@
+services:
+  # 1. Backend (Gunicorn)
+  backend-prod:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.prod # Usa o   Dockerfile de produção
+    image: desafio-backend-prod
+    restart: unless-stopped
+    env_file: .env.prod # Carrega as variáveis de produção
+    environment:
+      - DB_NAME=${POSTGRES_DB}
+      - DB_USER=${POSTGRES_USER}
+      - DB_PASSWORD=${POSTGRES_PASSWORD}
+    volumes:
+      # Cria um volume para os 'staticfiles' que o Nginx vai usar
+      - backend_static_data:/app/staticfiles
+    depends_on:
+      - db-prod
+    # NENHUMA porta exposta! O Nginx cuida disso.
+
+  # 2. Frontend (Next.js Server)
+  frontend-prod:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.prod # Usa o Dockerfile de produção
+    image: desafio-frontend-prod
+    restart: unless-stopped
+    # NENHUMA porta exposta!
+
+  # 3. Banco de Dados (Postgres)
+  db-prod:
+    image: postgres:18-alpine
+    restart: unless-stopped
+    env_file: .env.prod # Carrega as variáveis de produção
+    volumes:
+      - postgres_data_prod:/var/lib/postgresql/data
+    # NENHUMA porta exposta! (Só acessível pela rede interna)
+
+  # 4. Nginx (O Portão de Entrada)
+  nginx:
+    image: nginx:1.29-alpine
+    restart: unless-stopped
+    ports:
+      # Expõe as portas web padrão
+      - "80:80"
+      - "443:443"
+    volumes:
+      # Mapeia nosso 'nginx.conf'
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      # Mapeia os certificados SSL
+      - ./nginx/ssl/selfsigned.crt:/etc/ssl/certs/selfsigned.crt:ro
+      - ./nginx/ssl/selfsigned.key:/etc/ssl/private/selfsigned.key:ro
+      # Mapeia o volume de estáticos do backend (somente leitura)
+      - backend_static_data:/var/www/static:ro
+    depends_on:
+      - backend-prod
+      - frontend-prod
+
+volumes:
+  postgres_data_prod:
+  backend_static_data:

@@ -19,7 +19,7 @@ RUN python manage.py collectstatic --noinput
 
 # --- Estágio 2: "Runner" (A Imagem Final) ---
 # Começa do zero com uma imagem limpa
-FROM python:3.11-alpine
+FROM python:3.14-alpine
 
 WORKDIR /app
 
