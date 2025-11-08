@@ -1,6 +1,8 @@
 # Desafio: Do Dev ao Deploy
 
-![Charizard - Deploying with Fire!](https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/6.png)
+<p align="center">
+  <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/1.gif" alt="bulbasaur" width="100">
+</p>
 
 Este repositório é o resultado do desafio "Do Dev ao Deploy", que simula um fluxo de trabalho DevOps completo. O objetivo foi pegar uma aplicação web (Django + Next.js) e criar todo o ecossistema de containers e automação para desenvolvimento, testes e produção.
 
