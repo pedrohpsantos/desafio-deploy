@@ -1,0 +1,52 @@
+# --- Estágio 1: "Builder" ---
+# Objetivo: Coletar os arquivos estáticos do Django.
+FROM python:3.14-alpine AS builder
+
+WORKDIR /app
+
+# Variáveis de ambiente
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
+
+# Instala dependências
+COPY requirements.txt .
+RUN pip install -r requirements.txt
+
+# Copia o código e coleta os estáticos
+COPY . .
+# Isso roda o 'collectstatic' e coloca tudo em /app/staticfiles
+RUN python manage.py collectstatic --noinput
+
+# --- Estágio 2: "Runner" (A Imagem Final) ---
+# Começa do zero com uma imagem limpa
+FROM python:3.11-alpine
+
+WORKDIR /app
+
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
+
+# 1. (SEGURANÇA) Cria um usuário e grupo 'app' para não rodar como root
+RUN addgroup -S appgroup && adduser -S appuser -G appgroup
+
+# 2. Instala apenas as dependências de produção
+COPY requirements.txt .
+RUN pip install -r requirements.txt
+
+# 3. Copia o código-fonte
+COPY . .
+
+# 4. Copia os arquivos estáticos que coletamos no Estágio 1
+COPY --from=builder /app/staticfiles ./staticfiles
+
+# 5. (SEGURANÇA) Define o usuário 'appuser' como dono dos arquivos
+RUN chown -R appuser:appgroup /app
+
+# 6. (SEGURANÇA) Muda para o usuário não-root
+USER appuser
+
+# 7. Comando de Produção
+# Roda o Gunicorn!
+# --bind 0.0.0.0:8000 (acessível de fora)
+# config.wsgi:application (aponta para o nosso arquivo wsgi)
+CMD ["gunicorn", "config.wsgi:application", "--bind", "0.0.0.0:8000"]
