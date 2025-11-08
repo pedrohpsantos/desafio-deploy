@@ -1,0 +1,21 @@
+# Python / Django
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# Node.js / Next.js
+node_modules/
+.next/
+build/
+dist/
+.DS_Store
+
+# Arquivos de Ambiente
+.env
+.env.local
+.env.*
+
+# IDE
+.vscode/
+.idea/
