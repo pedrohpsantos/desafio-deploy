@@ -1,14 +1,14 @@
-import '@testing-library/jest-dom'
-import { render, screen } from '@testing-library/react'
-import Page from './page'
+import "@testing-library/jest-dom";
+import { render, screen } from "@testing-library/react";
+import Page from "./page";
 
-describe('Página Principal', () => {
+describe("Página Principal", () => {
   it('renderiza o texto principal "Get started by editing"', () => {
-    render(<Page />)
+    render(<Page />);
 
     // O app padrão do Next.js tem esse texto
-    const heading = screen.getByText(/Get started by editing/i)
+    const heading = screen.getByText(/To get started, edit the page.js file./i);
 
-    expect(heading).toBeInTheDocument()
-  })
-})
+    expect(heading).toBeInTheDocument();
+  });
+});
