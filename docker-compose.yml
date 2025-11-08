@@ -1,0 +1,52 @@
+# 'services' é onde definimos todos os nossos containers
+services:
+  
+  # 1. O serviço de Backend (Django)
+  backend:
+    build: ./backend
+    # 'build: ./backend' é o mesmo que 'docker build -t <nome> ./backend'
+    # Ele vai procurar o Dockerfile na pasta 'backend/'
+    ports:
+      - "8000:8000" # Mapeia a porta 8000 do host para 8000 do container
+    volumes:
+      - ./backend:/app # Mapeia o código local para o container (para hot-reload)
+    environment:
+      # Passa as variáveis do .env para o Django (para o settings.py)
+      - DB_NAME=${POSTGRES_DB}
+      - DB_USER=${POSTGRES_USER}
+      - DB_PASSWORD=${POSTGRES_PASSWORD}
+      - DB_HOST=${DB_HOST}
+      - DB_PORT=${DB_PORT}
+    depends_on:
+      - db # Diz ao Docker: "Espere o serviço 'db' estar pronto antes de subir o 'backend'"
+
+  # 2. O serviço de Frontend (Next.js)
+  frontend:
+    build: ./frontend
+    # Procura o Dockerfile na pasta 'frontend/'
+    ports:
+      - "3000:3000" # Mapeia a porta 3000
+    volumes:
+      - ./frontend:/app # Mapeia o código local (para hot-reload)
+      - /app/node_modules # O "truque" para não mapear o node_modules local
+    depends_on:
+      - backend # Opcional, mas boa prática. O frontend "depende" do backend.
+
+  # 3. O serviço de Banco de Dados (Postgres)
+  db:
+    image: postgres:18-alpine # Usa uma imagem pronta do Docker Hub
+    environment:
+      # Usa as variáveis do .env para inicializar o container do Postgres
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data # Persiste os dados do banco
+    ports:
+      - "5432:5432" # Expõe a porta do Postgres (útil para debug local, mas opcional)
+
+# 'volumes' é onde definimos os volumes "nomeados"
+volumes:
+  postgres_data: # Este nome 'postgres_data' é o que foi usado em 'db'
+    # O Docker gerencia essa pasta, garantindo que nossos dados não se percam
+    # quando o container 'db' for recriado.
