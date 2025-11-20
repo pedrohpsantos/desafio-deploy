@@ -62,7 +62,7 @@ Este ambiente é focado em **hot-reload** (mudanças no código são refletidas 
 
 ---
 
-## 🏭 Como Executar (Ambiente de Produção)
+## Como Executar (Ambiente de Produção)
 
 Este ambiente é focado em **segurança e performance**, usando Nginx como Proxy Reverso e SSL.
 
