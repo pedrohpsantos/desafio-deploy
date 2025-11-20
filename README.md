@@ -6,7 +6,7 @@
 
 Este repositório é o resultado do desafio "Do Dev ao Deploy", que simula um fluxo de trabalho DevOps completo. O objetivo foi pegar uma aplicação web (Django + Next.js) e criar todo o ecossistema de containers e automação para desenvolvimento, testes e produção.
 
-## 🚀 Tecnologias Utilizadas
+## Tecnologias Utilizadas
 
 - **Backend:** Django, Gunicorn
 - **Frontend:** Next.js
@@ -16,7 +16,7 @@ Este repositório é o resultado do desafio "Do Dev ao Deploy", que simula um fl
 - **CI/CD:** GitHub Actions
 - **Container Registry:** GitHub Container Registry (GHCR)
 
-## 📂 Estrutura do Repositório
+## Estrutura do Repositório
 
 ```
 
@@ -40,7 +40,7 @@ Este repositório é o resultado do desafio "Do Dev ao Deploy", que simula um fl
 
 ---
 
-## 🛠️ Como Executar (Ambiente de Desenvolvimento)
+## Como Executar (Ambiente de Desenvolvimento)
 
 Este ambiente é focado em **hot-reload** (mudanças no código são refletidas instantaneamente).
 
@@ -94,7 +94,7 @@ Este ambiente é focado em **segurança e performance**, usando Nginx como Proxy
 
 ---
 
-## 🤖 Resumo do Pipeline de CI/CD
+## Resumo do Pipeline de CI/CD
 
 O pipeline configurado em `.github/workflows/ci.yml` automatiza todo o ciclo de vida do projeto:
 
